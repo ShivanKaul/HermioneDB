@@ -1,37 +1,60 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.mcgill.ecse420.f2016</groupId>
-    <artifactId>distributedDB</artifactId>
-    <version>0.1</version>
+	<groupId>org.mcgill.ecse420.f2016</groupId>
+	<artifactId>distributedDB</artifactId>
+	<version>0.1</version>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.10</version>
-            </plugin>
-        </plugins>
-    </build>
+	<licenses>
+		<license>
+			<name>Sleepycat License</name>
+			<url>http://download.oracle.com/maven/com/sleepycat/je/license.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.sleepycat</groupId>
-            <artifactId>je</artifactId>
-            <version>3.3.75</version>
-        </dependency>
-    </dependencies>
+	<scm>
+		<url>https://github.com/ShivanKaul/BerkeleyDDB.git</url>
+		<connection>scm:git:git@github.com:ShivanKaul/BerkeleyDDB.git</connection>
+		<developerConnection>scm:git:git@github.com:ShivanKaul/BerkeleyDDB.git</developerConnection>
+	</scm>
 
-    <repositories>
-        <repository>
-            <id>oracleReleases</id>
-            <name>Oracle Released Java Packages</name>
-            <url>http://download.oracle.com/maven</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.10</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sleepycat</groupId>
+			<artifactId>je</artifactId>
+			<version>3.3.75</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>oracleReleases</id>
+			<name>Oracle Released Java Packages</name>
+			<url>http://download.oracle.com/maven</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
 
 </project>
