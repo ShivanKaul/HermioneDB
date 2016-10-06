@@ -12,7 +12,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.EnvironmentLockedException;
 import com.sleepycat.je.LockMode;
 
-public class BaseSample {
+public class Master {
 
   public static void main(String[] args) {
     EnvironmentConfig envConfig = new EnvironmentConfig();
