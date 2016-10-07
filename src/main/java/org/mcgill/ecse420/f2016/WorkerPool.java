@@ -1,6 +1,7 @@
 package org.mcgill.ecse420.f2016;
 
 import com.sleepycat.je.*;
+import org.mcgill.ecse420.f2016.Configs.WorkerConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,12 +11,12 @@ public class WorkerPool {
     private Map<Integer, Database> dbs = new HashMap<>();
 
     // Constructor
-    public WorkerPool(int numDBs, Environment environment,
-                      DatabaseConfig dbConfig,
+    public WorkerPool(int poolSize, WorkerConfig config,
                       String namingScheme) throws DatabaseException {
 
-        for (int i = 0; i < numDBs; i++) {
-            dbs.put(Integer.valueOf(i), environment.openDatabase(null, "worker" + namingScheme + i, dbConfig));
+
+        for (int i = 0; i < poolSize; i++) {
+            dbs.put(Integer.valueOf(i), config.environment.openDatabase(null, "worker" + namingScheme + i, config.dbConfig));
         }
     }
 
