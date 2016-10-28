@@ -11,4 +11,8 @@ public class MasterDb {
     public MasterDb(MasterConfig config) throws DatabaseException {
         db = config.environment.openDatabase(null, "masterDb", config.dbConfig);
     }
+    
+    public Database getDB() {
+      return db;
+    }
 }
