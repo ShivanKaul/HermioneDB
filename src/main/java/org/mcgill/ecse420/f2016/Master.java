@@ -8,6 +8,6 @@ import java.rmi.RemoteException;
 
 public interface Master extends Remote {
   String sayHello() throws RemoteException;
-  Result getWorkerHost(DatabaseEntry key) throws DatabaseException, RemoteException;
+  Result getWorkerHost(DatabaseEntry key) throws DatabaseException, RemoteException, WrongKeyFormatException;
 //  Result set(DatabaseEntry key, DatabaseEntry value) throws DatabaseException, RemoteException;
 }

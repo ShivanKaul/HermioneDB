@@ -1,5 +1,6 @@
 package org.mcgill.ecse420.f2016;
 
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -8,13 +9,26 @@ import java.rmi.server.UnicastRemoteObject;
 import org.mcgill.ecse420.f2016.Configs.MasterConfig;
 import org.mcgill.ecse420.f2016.Configs.WorkerConfig;
 
+import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.OperationStatus;
 
 public class MasterImpl implements Master {
+  private static final String WORKER_ADDRESS_FOR_CUSTOMER = "W1";
+  private static final String WORKER_ADDRESS_FOR_EMPLOYEE = "W2";
+  private static final String WORKER_ADDRESS_FOR_OTHERS = "W3";
   private WorkerPool workerPool;
   private MasterDb masterDb;
+  private DatabaseEntry customerKey;
+  private DatabaseEntry employeeKey;
+  private DatabaseEntry otherKey;
+  private DatabaseEntry worker1;
+  private DatabaseEntry worker2;
+  private DatabaseEntry worker3;
 
   public MasterImpl(int poolSize) throws DatabaseException {
     // Config DB for workers
@@ -43,7 +57,43 @@ public class MasterImpl implements Master {
     MasterConfig masterConfig =
         new MasterConfig(envConfigMaster, dbConfigMaster);
     masterDb = new MasterDb(masterConfig);
+    try {
+      customerKey = new DatabaseEntry("customer".getBytes("UTF-8"));
+      employeeKey = new DatabaseEntry("employee".getBytes("UTF-8"));
+      otherKey = new DatabaseEntry("other".getBytes("UTF-8"));
+      worker1 =
+          new DatabaseEntry(WORKER_ADDRESS_FOR_CUSTOMER.getBytes("UTF-8"));
+      worker2 =
+          new DatabaseEntry(WORKER_ADDRESS_FOR_EMPLOYEE.getBytes("UTF-8"));
+      worker3 = new DatabaseEntry(WORKER_ADDRESS_FOR_OTHERS.getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    initMetadata();
+  }
 
+  private void initMetadata() {
+    Database db = masterDb.getDB();
+    try {
+      if (db.get(null, customerKey, new DatabaseEntry(), LockMode.DEFAULT)
+          .equals(OperationStatus.NOTFOUND)) {
+        // TODO metadata for customer worker is not set yet. set it here
+        db.put(null, customerKey, worker1);
+      }
+      if (db.get(null, employeeKey, new DatabaseEntry(), LockMode.DEFAULT)
+          .equals(OperationStatus.NOTFOUND)) {
+        // TODO metadata for employee worker is not set yet. set it here
+        db.put(null, employeeKey, worker2);
+      }
+      if (db.get(null, otherKey, new DatabaseEntry(), LockMode.DEFAULT)
+          .equals(OperationStatus.NOTFOUND)) {
+        // TODO metadata for employee worker is not set yet. set it here
+        db.put(null, otherKey, worker3);
+      }
+      // TODO add 'other' type
+    } catch (DatabaseException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -68,5 +118,39 @@ public class MasterImpl implements Master {
       System.err.println("Server exception: " + e.toString());
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public Result getWorkerHost(DatabaseEntry key)
+      throws DatabaseException, RemoteException, WrongKeyFormatException {
+    try {
+      Database db = masterDb.getDB();
+      DatabaseEntry result = new DatabaseEntry();
+      String k = new String(key.getData(), "UTF-8");
+      if (!k.matches("^[a-z]+\\d+$")) {
+        // Invalid format.
+        throw new WrongKeyFormatException(
+            "Wrong key format. The key should start with the type followed by the index number");
+      }
+      if (k.startsWith("customer")) {
+        // TODO return customer related worker
+        OperationStatus ops =
+            db.get(null, customerKey, result, LockMode.DEFAULT);
+        return new Result(ops, null, result);
+      } else if (k.startsWith("employee")) {
+        // TODO return employee related worker
+        OperationStatus ops =
+            db.get(null, employeeKey, result, LockMode.DEFAULT);
+        return new Result(ops, null, result);
+      } else {
+        // TODO return null or a worker that takes any other type of data
+        OperationStatus ops = db.get(null, otherKey, result, LockMode.DEFAULT);
+        return new Result(ops, null, result);
+        // return null;
+      }
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }
