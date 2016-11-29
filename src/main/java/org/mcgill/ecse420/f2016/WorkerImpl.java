@@ -68,6 +68,11 @@ public class WorkerImpl implements Worker {
         DatabaseEntry gotValue = new DatabaseEntry();
         OperationStatus opStatus = workerDb.get(null, new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
         boolean opStatusb = false;
+        if (gotValue == null) {
+            System.out.println("Server responded with null! Are you sure the key you're " +
+                    "looking for exists?");
+            return new Result(opStatusb, false, null);
+        }
         if (opStatus.SUCCESS == opStatus) opStatusb = true;
         try {
             return new Result(opStatusb, true, new String(gotValue.getData(), "UTF-8"));

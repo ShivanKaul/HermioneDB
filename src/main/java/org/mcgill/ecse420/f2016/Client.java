@@ -49,10 +49,6 @@ public class Client {
         }
         Result response = promptResult.result();
         if (response.noErrors()) {
-          if (response.returnedValue == null) {
-            System.out.println("Server responded with null! Are you sure the key you're " +
-                    "looking for exists?");
-          }
           System.out.println("response: " + response.returnedValue);
         } else {
           System.out.println("Response in Client had errors: db status is "
