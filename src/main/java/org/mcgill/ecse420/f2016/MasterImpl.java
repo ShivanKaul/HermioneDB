@@ -31,7 +31,7 @@ public class MasterImpl implements Master {
     private DatabaseEntry worker2;
     private DatabaseEntry worker3;
 
-    public MasterImpl(int poolSize) throws DatabaseException {
+    public MasterImpl() throws DatabaseException {
         EnvironmentConfig envConfigWorker = new EnvironmentConfig();
         envConfigWorker.setAllowCreate(true);
         // DB config for workers
@@ -95,9 +95,9 @@ public class MasterImpl implements Master {
     public static void main(String args[]) {
 
         try {
-            int poolsize = (args.length < 1) ? 1 : Integer.parseInt(args[0]);
+//            int poolsize = (args.length < 1) ? 1 : Integer.parseInt(args[0]);
 
-            MasterImpl obj = new MasterImpl(poolsize);
+            MasterImpl obj = new MasterImpl();
             Master stub = (Master) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
