@@ -22,7 +22,7 @@ public class MasterImpl implements Master {
     // For now hardcoded to be Shivan's machine
     private static final String WORKER_ADDRESS_FOR_CUSTOMER = "142.157.42.151";
     // For now hardcoded to be my machine
-    private static final String WORKER_ADDRESS_FOR_EMPLOYEE = null;
+    private static final String WORKER_ADDRESS_FOR_EMPLOYEE = "localhost";
     private static final String WORKER_ADDRESS_FOR_OTHERS = "others";
     
     private MasterDb masterDb;
