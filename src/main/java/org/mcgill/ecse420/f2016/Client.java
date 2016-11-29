@@ -65,7 +65,7 @@ public class Client {
   private static PromptResult prompt(Master stub) throws Exception {
     Scanner scanner = new Scanner(System.in);
     System.out.println("What would you like to do? \n 1. `get <table> <key>` \n 2. `set <table> <key> <value>` \n 3. exit");
-    String input = scanner.next().toLowerCase();
+    String input = scanner.nextLine().toLowerCase();
     // Check if input is get or set
     String[] tokens = input.split("\\s");
     PromptResult promptResult = null;
