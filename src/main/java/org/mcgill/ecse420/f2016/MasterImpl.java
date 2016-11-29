@@ -17,9 +17,12 @@ import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
 
 public class MasterImpl implements Master {
-    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "W1";
-    private static final String WORKER_ADDRESS_FOR_EMPLOYEE = "W2";
-    private static final String WORKER_ADDRESS_FOR_OTHERS = "W3";
+    
+    //TODO Add a capability to dynamically assign worker addresses
+    private static final String WORKER_NAME_FOR_CUSTOMER = "customer";
+    private static final String WORKER_NAME_FOR_EMPLOYEE = "employee";
+    private static final String WORKER_NAME_FOR_OTHERS = "others";
+    
     private MasterDb masterDb;
     private DatabaseEntry customerKey;
     private DatabaseEntry employeeKey;
@@ -50,10 +53,10 @@ public class MasterImpl implements Master {
             employeeKey = new DatabaseEntry("employee".getBytes("UTF-8"));
             otherKey = new DatabaseEntry("other".getBytes("UTF-8"));
             worker1 =
-                    new DatabaseEntry(WORKER_ADDRESS_FOR_CUSTOMER.getBytes("UTF-8"));
+                    new DatabaseEntry(WORKER_NAME_FOR_CUSTOMER.getBytes("UTF-8"));
             worker2 =
-                    new DatabaseEntry(WORKER_ADDRESS_FOR_EMPLOYEE.getBytes("UTF-8"));
-            worker3 = new DatabaseEntry(WORKER_ADDRESS_FOR_OTHERS.getBytes("UTF-8"));
+                    new DatabaseEntry(WORKER_NAME_FOR_EMPLOYEE.getBytes("UTF-8"));
+            worker3 = new DatabaseEntry(WORKER_NAME_FOR_OTHERS.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -119,17 +122,17 @@ public class MasterImpl implements Master {
                     "Wrong key format. The key should start with the type followed by the index number");
         }
         if (k.startsWith("customer")) {
-            // TODO return customer related worker
+            // return customer related worker
             OperationStatus ops =
                     db.get(null, customerKey, result, LockMode.DEFAULT);
             return new Result(ops, null, result);
         } else if (k.startsWith("employee")) {
-            // TODO return employee related worker
+            // return employee related worker
             OperationStatus ops =
                     db.get(null, employeeKey, result, LockMode.DEFAULT);
             return new Result(ops, null, result);
         } else {
-            // TODO return null or a worker that takes any other type of data
+            // return or a worker that takes any other type of data
             OperationStatus ops = db.get(null, otherKey, result, LockMode.DEFAULT);
             return new Result(ops, null, result);
         }

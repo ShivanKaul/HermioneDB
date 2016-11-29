@@ -21,6 +21,9 @@ public class WorkerImpl implements Worker {
     }
 
     public static void main(String args[]) {
+        String name = (args.length < 1) ? null : args[0];
+        String host = (args.length < 2) ? null : args[1];
+
         // Config DB for workers
         // Environment for workers
         EnvironmentConfig envConfigWorker = new EnvironmentConfig();
@@ -33,12 +36,12 @@ public class WorkerImpl implements Worker {
         try {
             // Set worker config
             WorkerConfig workerConfig = new WorkerConfig(envConfigWorker, dbConfigWorker);
-            WorkerImpl obj = new WorkerImpl(workerConfig, "test");
+            WorkerImpl obj = new WorkerImpl(workerConfig, name.toLowerCase());
             Worker stub = (Worker) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry();
-            registry.bind("Hello", stub);
+            Registry registry = LocateRegistry.getRegistry(host);
+            registry.bind(name.toLowerCase(), stub);
 
             System.err.println("Worker ready");
         } catch (RemoteException e) {
