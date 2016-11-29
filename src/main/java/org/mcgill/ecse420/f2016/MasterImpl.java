@@ -121,20 +121,39 @@ public class MasterImpl implements Master {
 //            throw new WrongKeyFormatException(
 //                    "Wrong key format. The key should start with the type followed by the index number");
 //        }
+        boolean opsb= false;
         if (k.startsWith("customer")) {
             // return customer related worker
             OperationStatus ops =
                     db.get(null, customerKey, result, LockMode.DEFAULT);
-            return new Result(ops, null, result);
+            if (ops.SUCCESS == ops) opsb = true;
+            try {
+                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return new Result(opsb, false, null);
+            }
         } else if (k.startsWith("employee")) {
             // return employee related worker
             OperationStatus ops =
                     db.get(null, employeeKey, result, LockMode.DEFAULT);
-            return new Result(ops, null, result);
+            if (ops.SUCCESS == ops) opsb = true;
+            try {
+                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return new Result(opsb, false, null);
+            }
         } else {
             // return or a worker that takes any other type of data
             OperationStatus ops = db.get(null, otherKey, result, LockMode.DEFAULT);
-            return new Result(ops, null, result);
+            if (ops.SUCCESS == ops) opsb = true;
+            try {
+                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return new Result(opsb, false, null);
+            }
         }
     }
 }

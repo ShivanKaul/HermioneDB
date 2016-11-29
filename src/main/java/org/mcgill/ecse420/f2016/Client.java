@@ -52,8 +52,8 @@ public class Client {
           System.out.println("response: " + response.returnedValue);
         } else {
           System.out.println("Response in Client had errors: db status is "
-                  + response.dbStatus.toString() + " and worker status is "
-                  + response.workerPoolStatus.toString());
+                  + response.dbStatus + " and worker status is "
+                  + response.workerPoolStatus);
         }
       } catch (Exception e) {
         System.err.println("Client exception: " + e.toString());
@@ -88,32 +88,23 @@ public class Client {
   private static Result handleGet(String table, String key, Master stub) throws Exception {
     // Get a handle to the worker from the master
     // Talk to the worker directly
-    DatabaseEntry keyEntry =
-            new DatabaseEntry(key.getBytes("UTF-8"));
-
     Result response = stub.getWorkerHost(table + "_" + key);
     if (response.noErrors()) {
-      String workerName = new String(response.returnedValue.getData(), "UTF-8");
+      String workerName = response.returnedValue;
       // Connect to worker
       Worker worker = (Worker) registry.lookup(workerName);
-      return worker.get(keyEntry);
+      return worker.get(key);
     } else return response;
   }
   private static Result handleSet(String table, String key, String value, Master stub) throws Exception {
     // Get a handle to the worker from the master
     // Talk to the worker directly
-    DatabaseEntry keyEntry =
-            new DatabaseEntry(key.getBytes("UTF-8"));
-
-    DatabaseEntry valueEntry =
-            new DatabaseEntry(value.getBytes("UTF-8"));
-
     Result response = stub.getWorkerHost(table + "_" + key);
     if (response.noErrors()) {
-      String workerName = new String(response.returnedValue.getData(), "UTF-8");
+      String workerName = response.returnedValue;
       // Connect to worker
       Worker worker = (Worker) registry.lookup(workerName);
-      return worker.set(keyEntry, valueEntry);
+      return worker.set(key, value);
     } else return response;
 
   }

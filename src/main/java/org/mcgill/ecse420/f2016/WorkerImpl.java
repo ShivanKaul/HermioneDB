@@ -3,6 +3,7 @@ package org.mcgill.ecse420.f2016;
 import com.sleepycat.je.*;
 import org.mcgill.ecse420.f2016.Configs.WorkerConfig;
 
+import java.io.UnsupportedEncodingException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -61,14 +62,23 @@ public class WorkerImpl implements Worker {
     }
 
     // Remote Method: Will be called by client driver after getting reference to this worker
-    public Result get(DatabaseEntry key) throws DatabaseException {
+    public Result get(String key) throws DatabaseException, UnsupportedEncodingException {
         DatabaseEntry gotValue = new DatabaseEntry();
-        OperationStatus opStatus = workerDb.get(null, key, gotValue, LockMode.DEFAULT); // Might throw database exception
-        return new Result(opStatus, Result.WorkerPoolStatus.SUCCESS, gotValue);
+        OperationStatus opStatus = workerDb.get(null, new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
+        boolean opStatusb = false;
+        if (opStatus.SUCCESS == opStatus) opStatusb = true;
+        try {
+            return new Result(opStatusb, true, new String(gotValue.getData(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return new Result(opStatusb, false, null);
+        }
     }
     // Remote Method: Will be called by client driver after getting reference to this worker
-    public Result set(DatabaseEntry key, DatabaseEntry value) throws DatabaseException {
-        OperationStatus opStatus = workerDb.put(null, key, value); // Might throw database exception
-        return new Result(opStatus, Result.WorkerPoolStatus.SUCCESS, null);
+    public Result set(String key, String value) throws DatabaseException, UnsupportedEncodingException {
+        OperationStatus opStatus = workerDb.put(null, new DatabaseEntry(key.getBytes("UTF-8")), new DatabaseEntry(value.getBytes("UTF-8"))); // Might throw database exception
+        boolean opStatusb = false;
+        if (opStatus.SUCCESS == opStatus) opStatusb = true;
+        return new Result(opStatusb, true, null);
     }
 }

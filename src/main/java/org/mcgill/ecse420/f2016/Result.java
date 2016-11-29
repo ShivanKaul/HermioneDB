@@ -11,21 +11,18 @@ public class Result implements Serializable{
      * 
      */
     private static final long serialVersionUID = 1L;
-    public OperationStatus dbStatus = OperationStatus.SUCCESS;
-    public WorkerPoolStatus workerPoolStatus = WorkerPoolStatus.SUCCESS;
-    public final DatabaseEntry returnedValue;
+    
+    public boolean dbStatus = true;
+    public boolean workerPoolStatus = true;
+    public final String returnedValue;
 
-    public Result(OperationStatus opStatus, WorkerPoolStatus poolStatus, DatabaseEntry value) {
+    public Result(boolean opStatus, boolean poolStatus, String value) {
         this.dbStatus = opStatus;
         this.workerPoolStatus = poolStatus;
         this.returnedValue= value;
     }
 
-    public enum WorkerPoolStatus {
-        SUCCESS, DBNOTFOUND
-    }
-
     public boolean noErrors() {
-        return this.dbStatus == OperationStatus.SUCCESS && this.workerPoolStatus == WorkerPoolStatus.SUCCESS;
+        return this.dbStatus && this.workerPoolStatus;
     }
 }
