@@ -99,8 +99,22 @@ public class Client {
       return worker.get(keyEntry);
     } else return response;
   }
-  private static Result handleSet(String table, String key, String value, Master stub) {
-    Result response = stub.sayHello();
+  private static Result handleSet(String table, String key, String value, Master stub) throws Exception {
+    // Get a handle to the worker from the master
+    // Talk to the worker directly
+    DatabaseEntry keyEntry =
+            new DatabaseEntry(key.getBytes("UTF-8"));
+
+    DatabaseEntry valueEntry =
+            new DatabaseEntry(value.getBytes("UTF-8"));
+
+    Result response = stub.getWorkerHost(table + "_" + key);
+    if (response.noErrors()) {
+      String workerName = new String(response.returnedValue.getData(), "UTF-8");
+      // Connect to worker
+      Worker worker = (Worker) registry.lookup(workerName);
+      return worker.set(keyEntry, valueEntry);
+    } else return response;
 
   }
 
