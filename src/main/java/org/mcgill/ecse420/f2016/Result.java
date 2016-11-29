@@ -5,8 +5,8 @@ import com.sleepycat.je.OperationStatus;
 
 public class Result {
 
-    public final OperationStatus dbStatus;
-    public final WorkerPoolStatus workerPoolStatus;
+    public OperationStatus dbStatus = OperationStatus.SUCCESS;
+    public WorkerPoolStatus workerPoolStatus = WorkerPoolStatus.SUCCESS;
     public final DatabaseEntry returnedValue;
 
     public Result(OperationStatus opStatus, WorkerPoolStatus poolStatus, DatabaseEntry value) {
@@ -17,5 +17,9 @@ public class Result {
 
     public enum WorkerPoolStatus {
         SUCCESS, DBNOTFOUND
+    }
+
+    public boolean noErrors() {
+        return this.dbStatus == OperationStatus.SUCCESS && this.workerPoolStatus == WorkerPoolStatus.SUCCESS;
     }
 }
