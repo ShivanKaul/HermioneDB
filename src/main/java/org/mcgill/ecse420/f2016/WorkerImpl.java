@@ -35,7 +35,7 @@ public class WorkerImpl implements Worker {
 
         try {
             // Set worker config
-            WorkerConfig workerConfig = new WorkerConfig(envConfigWorker, dbConfigWorker);
+            WorkerConfig workerConfig = new WorkerConfig(name.toLowerCase(), envConfigWorker, dbConfigWorker);
             WorkerImpl obj = new WorkerImpl(workerConfig, name.toLowerCase());
             Worker stub = (Worker) UnicastRemoteObject.exportObject(obj, 0);
 

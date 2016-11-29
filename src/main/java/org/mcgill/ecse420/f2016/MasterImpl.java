@@ -116,11 +116,11 @@ public class MasterImpl implements Master {
             throws DatabaseException, RemoteException, WrongKeyFormatException {
         Database db = masterDb.getDB();
         DatabaseEntry result = new DatabaseEntry();
-        if (!k.matches("^[a-z]+_\\d+$")) {
-            // Invalid format.
-            throw new WrongKeyFormatException(
-                    "Wrong key format. The key should start with the type followed by the index number");
-        }
+//        if (!k.matches("^[a-z]+_\\d+$")) {
+//            // Invalid format.
+//            throw new WrongKeyFormatException(
+//                    "Wrong key format. The key should start with the type followed by the index number");
+//        }
         if (k.startsWith("customer")) {
             // return customer related worker
             OperationStatus ops =

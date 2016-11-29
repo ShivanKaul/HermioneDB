@@ -6,7 +6,7 @@ import com.sleepycat.je.EnvironmentConfig;
 
 public class WorkerConfig extends Config {
 
-    public WorkerConfig(EnvironmentConfig envConfig, DatabaseConfig dbConfig) throws DatabaseException {
-        super("/tmp/worker", envConfig, dbConfig);
+    public WorkerConfig(String name, EnvironmentConfig envConfig, DatabaseConfig dbConfig) throws DatabaseException {
+        super("/tmp/worker_" + name, envConfig, dbConfig);
     }
 }

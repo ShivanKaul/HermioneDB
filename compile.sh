@@ -1,5 +1,6 @@
 destDir=/tmp/berkeleydb/
 mkdir -p $destDir
+mkdir -p /tmp/master /tmp/worker
 javac -d $destDir -cp ~/.m2/repository/com/sleepycat/je/3.3.75/je-3.3.75.jar src/main/java/org/mcgill/ecse420/f2016/Configs/*.java src/main/java/org/mcgill/ecse420/f2016/*.java
 cp *sh $destDir
 cp *jar $destDir

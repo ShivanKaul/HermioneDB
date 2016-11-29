@@ -7,7 +7,7 @@ import com.sleepycat.je.EnvironmentConfig;
 public class MasterConfig extends Config {
 
     public MasterConfig(EnvironmentConfig envConfig, DatabaseConfig dbConfig) throws DatabaseException {
-        super("/tmp/worker", envConfig, dbConfig);
+        super("/tmp/master", envConfig, dbConfig);
 
     }
 }
