@@ -7,10 +7,9 @@ ctrl_c() {
         echo "** Trapped CTRL-C.. Killing rmiregistry process..."
         kill `ps -a | grep rmi | cut -d ' ' -f 1`
     }
-jar xf je-3.3.75.jar
 rmiregistry &
 echo -e "Process running rmi registry: ";
 ps | grep rmiregistry;
 
 #java -classpath je-3.3.75.jar:. -Djava.rmi.server.codebase=file:. org.mcgill.ecse420.f2016.MasterImpl;
-java -Djava.ext.dirs=/tmp/berkeleydb -classpath "/tmp/berkeleydb/*:." -Djava.rmi.server.codebase=file:. org.mcgill.ecse420.f2016.MasterImpl;
+java -classpath /tmp/berkeleydb/je-3.3.75.jar -Djava.rmi.server.codebase=file:. org.mcgill.ecse420.f2016.MasterImpl;
