@@ -118,6 +118,7 @@ public class MasterImpl implements Master {
             throws DatabaseException, RemoteException, WrongKeyFormatException {
         Database db = masterDb.getDB();
         DatabaseEntry result = new DatabaseEntry();
+        System.out.println("Master received request for key " + k);
 //        if (!k.matches("^[a-z]+_\\d+$")) {
 //            // Invalid format.
 //            throw new WrongKeyFormatException(

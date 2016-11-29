@@ -14,6 +14,7 @@ public class WorkerImpl implements Worker {
 
     private Database workerDb;
     private String namePrefix = "worker_";
+    private static String name;
 
     // Constructor
     public WorkerImpl(WorkerConfig config,
@@ -22,7 +23,7 @@ public class WorkerImpl implements Worker {
     }
 
     public static void main(String args[]) {
-        String name = (args.length < 1) ? null : args[0];
+        name = (args.length < 1) ? null : args[0];
         String host = (args.length < 2) ? null : args[1];
 
         // Config DB for workers
@@ -63,6 +64,7 @@ public class WorkerImpl implements Worker {
 
     // Remote Method: Will be called by client driver after getting reference to this worker
     public Result get(String key) throws DatabaseException, UnsupportedEncodingException {
+        System.out.println("Worker " + name + " received get request for key " + key);
         DatabaseEntry gotValue = new DatabaseEntry();
         OperationStatus opStatus = workerDb.get(null, new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
         boolean opStatusb = false;
@@ -76,6 +78,8 @@ public class WorkerImpl implements Worker {
     }
     // Remote Method: Will be called by client driver after getting reference to this worker
     public Result set(String key, String value) throws DatabaseException, UnsupportedEncodingException {
+        System.out.println("Worker " + name + " received set request for key " + key
+                + " with value " + value);
         OperationStatus opStatus = workerDb.put(null, new DatabaseEntry(key.getBytes("UTF-8")), new DatabaseEntry(value.getBytes("UTF-8"))); // Might throw database exception
         boolean opStatusb = false;
         if (opStatus.SUCCESS == opStatus) opStatusb = true;
