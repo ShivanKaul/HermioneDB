@@ -19,9 +19,11 @@ import com.sleepycat.je.OperationStatus;
 public class MasterImpl implements Master {
     
     //TODO Add a capability to dynamically assign worker addresses
-    private static final String WORKER_NAME_FOR_CUSTOMER = "customer";
-    private static final String WORKER_NAME_FOR_EMPLOYEE = "employee";
-    private static final String WORKER_NAME_FOR_OTHERS = "others";
+    // For now hardcoded to be Shivan's machine
+    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "142.157.42.151";
+    // For now hardcoded to be my machine
+    private static final String WORKER_ADDRESS_FOR_EMPLOYEE = null;
+    private static final String WORKER_ADDRESS_FOR_OTHERS = "others";
     
     private MasterDb masterDb;
     private DatabaseEntry customerKey;
@@ -53,10 +55,10 @@ public class MasterImpl implements Master {
             employeeKey = new DatabaseEntry("employee".getBytes("UTF-8"));
             otherKey = new DatabaseEntry("other".getBytes("UTF-8"));
             worker1 =
-                    new DatabaseEntry(WORKER_NAME_FOR_CUSTOMER.getBytes("UTF-8"));
+                    new DatabaseEntry(WORKER_ADDRESS_FOR_CUSTOMER.getBytes("UTF-8"));
             worker2 =
-                    new DatabaseEntry(WORKER_NAME_FOR_EMPLOYEE.getBytes("UTF-8"));
-            worker3 = new DatabaseEntry(WORKER_NAME_FOR_OTHERS.getBytes("UTF-8"));
+                    new DatabaseEntry(WORKER_ADDRESS_FOR_EMPLOYEE.getBytes("UTF-8"));
+            worker3 = new DatabaseEntry(WORKER_ADDRESS_FOR_OTHERS.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

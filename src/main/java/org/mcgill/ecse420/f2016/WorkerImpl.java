@@ -41,8 +41,8 @@ public class WorkerImpl implements Worker {
             Worker stub = (Worker) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry(host);
-            registry.bind(name.toLowerCase(), stub);
+            Registry registry = LocateRegistry.getRegistry();
+            registry.bind("Worker", stub);
 
             System.err.println("Worker ready");
         } catch (RemoteException e) {

@@ -90,9 +90,10 @@ public class Client {
     // Talk to the worker directly
     Result response = stub.getWorkerHost(table + "_" + key);
     if (response.noErrors()) {
-      String workerName = response.returnedValue;
+      String workerAddress = response.returnedValue;
       // Connect to worker
-      Worker worker = (Worker) registry.lookup(workerName);
+      registry = LocateRegistry.getRegistry(workerAddress);
+      Worker worker = (Worker) registry.lookup("Worker");
       return worker.get(key);
     } else return response;
   }
@@ -101,9 +102,10 @@ public class Client {
     // Talk to the worker directly
     Result response = stub.getWorkerHost(table + "_" + key);
     if (response.noErrors()) {
-      String workerName = response.returnedValue;
+      String workerAddress = response.returnedValue;
       // Connect to worker
-      Worker worker = (Worker) registry.lookup(workerName);
+      registry = LocateRegistry.getRegistry(workerAddress);
+      Worker worker = (Worker) registry.lookup("Worker");     
       return worker.set(key, value);
     } else return response;
 
