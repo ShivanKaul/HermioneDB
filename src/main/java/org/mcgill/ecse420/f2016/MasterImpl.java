@@ -20,7 +20,8 @@ public class MasterImpl implements Master {
     
     //TODO Add a capability to dynamically assign worker addresses
     // For now hardcoded to be Shivan's machine
-    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "142.157.42.151";
+//    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "142.157.42.151";
+    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "192.168.2.14";
     // For now hardcoded to be my machine
     private static final String WORKER_ADDRESS_FOR_EMPLOYEE = "localhost";
     private static final String WORKER_ADDRESS_FOR_OTHERS = "others";
@@ -118,7 +119,7 @@ public class MasterImpl implements Master {
             throws DatabaseException, RemoteException, WrongKeyFormatException {
         Database db = masterDb.getDB();
         DatabaseEntry result = new DatabaseEntry();
-        System.out.println("Master received request for key " + k);
+        System.out.println("Master received worker address request for key " + k);
 //        if (!k.matches("^[a-z]+_\\d+$")) {
 //            // Invalid format.
 //            throw new WrongKeyFormatException(

@@ -69,8 +69,7 @@ public class WorkerImpl implements Worker {
         OperationStatus opStatus = workerDb.get(null, new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
         boolean opStatusb = false;
         if (gotValue.getData() == null) {
-            System.out.println("Server responded with null! Are you sure the key you're " +
-                    "looking for exists?");
+            System.out.println("Key " + key + " doesn't exist in worker " + name);
             return new Result(opStatusb, false, null);
         }
         if (OperationStatus.SUCCESS == opStatus) opStatusb = true;

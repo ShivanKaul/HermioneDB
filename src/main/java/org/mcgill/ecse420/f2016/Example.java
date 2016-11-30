@@ -3,7 +3,7 @@ package org.mcgill.ecse420.f2016;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 
-import com.sleepycat.je.Database;
+import com.sleepycat.je.Database; // BerkeleyDB
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
@@ -30,8 +30,8 @@ public class Example {
           new DatabaseEntry(" data content".getBytes("UTF-8"));
       DatabaseEntry keyValue =
           new DatabaseEntry("key content".getBytes("UTF-8"));
-      db.put(null, keyValue, dataValue);// inserting an entry
-      db.get(null, keyValue, searchEntry, LockMode.DEFAULT);// retrieving record
+      db.put(null, keyValue, dataValue);// Inserting key -> value
+      db.get(null, keyValue, searchEntry, LockMode.DEFAULT); // Retrieving key
       @SuppressWarnings("unused")
       String foundData = new String(searchEntry.getData(), "UTF-8");
       dataValue = new DatabaseEntry("updated data content".getBytes("UTF-8"));
