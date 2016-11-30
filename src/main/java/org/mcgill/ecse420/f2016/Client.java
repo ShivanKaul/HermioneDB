@@ -8,10 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-
-/**
- * Created by shivan on 2016-10-06.
- */
 public class Client {
 
   static Registry registry;
@@ -140,17 +136,37 @@ private static PromptResult prompt(Master stub) throws Exception {
     return (Worker) registry.lookup("Worker");
   }
 
-  private static Result handleSet(String table, String key, String value, Master stub) throws Exception {
+  private static Result handleSet(String table, String key, String value, Master master_stub) throws Exception {
     // Get a handle to the worker from the master
     // Talk to the worker directly
-    Result response = stub.getWorkerHost(table + "_" + key);
-    if (response.noErrors()) {
-      String workerAddress = response.returnedValue;
-      // Connect to worker
-      registry = LocateRegistry.getRegistry(workerAddress);
-      Worker worker = (Worker) registry.lookup("Worker");     
+    String compositeKey = table + "_" + key;
+    if (!cache.containsKey(compositeKey)) {
+      Result response = master_stub.getWorkerHost(compositeKey);
+      if (response.noErrors()) {
+        String workerAddress = response.returnedValue;
+        Worker worker = getWorkerFromAddress(workerAddress);
+        // Put in cache
+        cache.put(compositeKey, workerAddress);
+        return worker.get(key);
+      } else return response;
+    } else { // cache does contain key
+      String workerAddress = cache.get(compositeKey);
+      Worker worker;
+      try {
+        worker = getWorkerFromAddress(workerAddress);
+      } catch (Exception e) {
+        // failed, just get key from master
+        Result response = master_stub.getWorkerHost(compositeKey);
+        if (response.noErrors()) {
+          workerAddress = response.returnedValue;
+          worker = getWorkerFromAddress(workerAddress);
+          // Put in cache
+          cache.put(compositeKey, workerAddress);
+          return worker.set(key, value);
+        } else return response;
+      }
       return worker.set(key, value);
-    } else return response;
+    }
 
   }
 
