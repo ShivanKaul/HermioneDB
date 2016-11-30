@@ -14,5 +14,6 @@ public class Config {
     public Config(String envLocation, EnvironmentConfig envConfig, DatabaseConfig dbConfig) throws DatabaseException {
         this.environment = new Environment(new File(envLocation), envConfig);
         this.dbConfig = dbConfig;
+        dbConfig.setDeferredWrite(true);
     }
 }

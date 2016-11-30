@@ -88,6 +88,7 @@ public class WorkerImpl implements Worker {
         OperationStatus opStatus = workerDb.put(null, new DatabaseEntry(key.getBytes("UTF-8")), new DatabaseEntry(value.getBytes("UTF-8"))); // Might throw database exception
         boolean opStatusb = false;
         if (opStatus.SUCCESS == opStatus) opStatusb = true;
+        workerDb.sync();
         return new Result(opStatusb, true, null);
     }
 }
