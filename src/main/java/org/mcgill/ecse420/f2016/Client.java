@@ -1,8 +1,5 @@
 package org.mcgill.ecse420.f2016;
 
-import com.sleepycat.je.DatabaseEntry;
-
-import java.io.UnsupportedEncodingException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -81,7 +78,8 @@ public class Client {
     }
   }
 
-  private static PromptResult prompt(Master stub) throws Exception {
+  @SuppressWarnings("resource")
+private static PromptResult prompt(Master stub) throws Exception {
     Scanner scanner = new Scanner(System.in);
     System.out.println("What would you like to do? \n 1. `get <table> <key>` \n 2. `set <table> <key> <value>` \n 3. exit");
     String input = scanner.nextLine().toLowerCase();

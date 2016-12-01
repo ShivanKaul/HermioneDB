@@ -129,7 +129,7 @@ public class MasterImpl implements Master {
             // return customer related worker
             OperationStatus ops =
                     db.get(null, customerKey, result, LockMode.DEFAULT);
-            if (ops.SUCCESS == ops) opsb = true;
+            if (OperationStatus.SUCCESS == ops) opsb = true;
             try {
                 return new Result(opsb, true, new String(result.getData(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -140,7 +140,7 @@ public class MasterImpl implements Master {
             // return employee related worker
             OperationStatus ops =
                     db.get(null, employeeKey, result, LockMode.DEFAULT);
-            if (ops.SUCCESS == ops) opsb = true;
+            if (OperationStatus.SUCCESS == ops) opsb = true;
             try {
                 return new Result(opsb, true, new String(result.getData(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -150,7 +150,7 @@ public class MasterImpl implements Master {
         } else {
             // return or a worker that takes any other type of data
             OperationStatus ops = db.get(null, otherKey, result, LockMode.DEFAULT);
-            if (ops.SUCCESS == ops) opsb = true;
+            if (OperationStatus.SUCCESS == ops) opsb = true;
             try {
                 return new Result(opsb, true, new String(result.getData(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {

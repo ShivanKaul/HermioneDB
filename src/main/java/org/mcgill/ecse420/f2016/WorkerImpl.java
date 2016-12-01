@@ -24,7 +24,7 @@ public class WorkerImpl implements Worker {
 
     public static void main(String args[]) {
         name = (args.length < 1) ? null : args[0];
-        String host = (args.length < 2) ? null : args[1];
+//        String host = (args.length < 2) ? null : args[1];
 
         // Config DB for workers
         // Environment for workers
@@ -73,7 +73,7 @@ public class WorkerImpl implements Worker {
                     "looking for exists?");
             return new Result(opStatusb, false, null);
         }
-        if (opStatus.SUCCESS == opStatus) opStatusb = true;
+        if (OperationStatus.SUCCESS == opStatus) opStatusb = true;
         try {
             return new Result(opStatusb, true, new String(gotValue.getData(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
@@ -87,7 +87,7 @@ public class WorkerImpl implements Worker {
                 + " with value " + value);
         OperationStatus opStatus = workerDb.put(null, new DatabaseEntry(key.getBytes("UTF-8")), new DatabaseEntry(value.getBytes("UTF-8"))); // Might throw database exception
         boolean opStatusb = false;
-        if (opStatus.SUCCESS == opStatus) opStatusb = true;
+        if (OperationStatus.SUCCESS == opStatus) opStatusb = true;
         workerDb.sync();
         return new Result(opStatusb, true, null);
     }

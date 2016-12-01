@@ -2,9 +2,6 @@ package org.mcgill.ecse420.f2016;
 
 import java.io.Serializable;
 
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.OperationStatus;
-
 public class Result implements Serializable{
 
     /**

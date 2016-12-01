@@ -32,6 +32,7 @@ public class Example {
           new DatabaseEntry("key content".getBytes("UTF-8"));
       db.put(null, keyValue, dataValue);// inserting an entry
       db.get(null, keyValue, searchEntry, LockMode.DEFAULT);// retrieving record
+      @SuppressWarnings("unused")
       String foundData = new String(searchEntry.getData(), "UTF-8");
       dataValue = new DatabaseEntry("updated data content".getBytes("UTF-8"));
       db.put(null, keyValue, dataValue);// updating an entry
