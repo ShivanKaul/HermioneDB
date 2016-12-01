@@ -147,7 +147,7 @@ private static PromptResult prompt(Master stub) throws Exception {
         Worker worker = getWorkerFromAddress(workerAddress);
         // Put in cache
         cache.put(compositeKey, workerAddress);
-        return worker.get(key);
+        return worker.set(key, value);
       } else return response;
     } else { // cache does contain key
       String workerAddress = cache.get(compositeKey);
