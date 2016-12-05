@@ -6,7 +6,7 @@ Taking [BerkeleyDB](https://en.wikipedia.org/wiki/Berkeley_DB) and making it dis
 Make sure you have access to /tmp/ directory of your machine.
 
 To compile and run the software:
-  1. Run compile.sh script.(do it on each host if using multiple hosts)
+  1. Run compile.sh script. (Do it on each host if using multiple hosts)
   2. Go to the directory '/tmp/berkeleydb/'
   3. On the master host, run runServer.sh script.
   4. On each worker host, run runWorker.sh <Database_Name> <IP_of_Master>.
