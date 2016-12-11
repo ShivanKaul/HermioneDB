@@ -1,7 +1,7 @@
 BerkeleyDDB
 ---------
 
-Using [BerkeleyDB](https://en.wikipedia.org/wiki/Berkeley_DB) to make a distributed database. Project report is *ECSE420_Project.pdf*.
+Using [BerkeleyDB](https://en.wikipedia.org/wiki/Berkeley_DB) to make a distributed database. Project report is *[ECSE420_Project.pdf](https://github.com/ShivanKaul/BerkeleyDDB/blob/master/ECSE420_Project.pdf)*.
 
 ### Running Instructions
 
