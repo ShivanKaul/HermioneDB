@@ -11,9 +11,15 @@ public class PromptResult {
     private MasterResult masterResult = null;
     private Method method;
     private boolean continueLoop = true;
+    private boolean inputError = false;
 
     public enum Method {
         GET, SET
+    }
+
+    public PromptResult(boolean inputError, boolean continueLoop) {
+        this.inputError = inputError;
+        this.continueLoop = continueLoop;
     }
 
     public PromptResult(WorkerResult workerResult, MasterResult masterResult,
@@ -23,12 +29,12 @@ public class PromptResult {
         this.method = method;
     }
 
-    public PromptResult(boolean continueLoop) {
-        this.continueLoop = continueLoop;
-    }
-
     public boolean continueLoop() {
         return this.continueLoop;
+    }
+
+    public boolean inputError() {
+        return inputError;
     }
 
     public WorkerResult workerResult() {

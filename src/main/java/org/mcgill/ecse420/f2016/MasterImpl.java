@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class MasterImpl implements Master {
 
-    public static final int RING_SIZE = 1000;
+    public static final int RING_SIZE = 10000;
 
     private MasterDb masterDb;
 
@@ -65,22 +65,25 @@ public class MasterImpl implements Master {
         // Generate unique reference to worker
         // Store in DB
         try {
+            String tableNameForLogging = (new String(tableName.getData(), "UTF-8"));
             JSONObject value = new JSONObject().put("id", id).put("address", address);
-            System.out.println("Json object looks like " + value.toString());
             DatabaseEntry got = new DatabaseEntry();
             if (db.get(null, tableName, got, LockMode.DEFAULT)
                     .equals(OperationStatus.NOTFOUND)) {
                 // metadata for table is not set yet. set it here
                 JSONArray ring = new JSONArray();
                 ring.put(value);
-                System.out.println("Table does not exist, adding...");
-                System.out.println("Ring looks like: " + ring.toString());
+                System.out.println(String.format("Table %s does not exist, adding...",
+                        tableNameForLogging));
+                System.out.println(String.format("Hashing ring for table %s looks like: %s",
+                        tableNameForLogging, ring.toString()));
                 db.put(null, tableName, new DatabaseEntry(ring.toString().getBytes("UTF-8")));
             } else {
                 JSONArray ring = new JSONArray(new String(got.getData(), "UTF-8"));
                 ring.put(value);
                 System.out.println("Table exists, appending...");
-                System.out.println("Ring looks like: " + ring.toString());
+                System.out.println(String.format("Hashing ring for table %s " +
+                        "looks like: %s", tableNameForLogging, ring.toString()));
                 db.put(null, tableName, new DatabaseEntry(ring.toString().getBytes("UTF-8")));
             }
             db.sync();
@@ -103,7 +106,7 @@ public class MasterImpl implements Master {
     public void registerWorker(int id, String tableName, String ipAddress)
             throws RemoteException, UnsupportedEncodingException {
         // put in db
-        System.out.println("Received request to add worker "
+        System.out.println("Received request from a worker to add table "
                 + tableName
                 + " for ip address " + ipAddress);
         DatabaseEntry table = new DatabaseEntry(tableName.getBytes("UTF-8"));

@@ -30,7 +30,7 @@ public class Client {
     // The cache is of composite key to Computation Result
     // Composite key : table_key
     // ComputationResult : describes the 'hashing' object returned by the Master
-    static Map<String, ComputationResult> cache = new HashMap<>();
+    private static Map<String, ComputationResult> cache = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -44,13 +44,13 @@ public class Client {
         try {
             registry = LocateRegistry.getRegistry(host);
         } catch (Exception e) {
-            System.out.println("Error while trying to get registry from host " + host + ": " + e.getMessage());
+            System.out.println(" \nError while trying to get registry from host " + host + ": " + e.getMessage());
             System.exit(1);
         }
         try {
             masterStub = (Master) registry.lookup("Master");
         } catch (Exception e) {
-            System.out.println("Error finding Master in registry from client: " + e.toString());
+            System.out.println(" \nError finding Master in registry from client: " + e.toString());
         }
         // Prompt loop
         boolean loop = true;
@@ -58,7 +58,13 @@ public class Client {
             try {
                 PromptResult promptResult = prompt(masterStub);
                 if (!promptResult.continueLoop()) {
+                    System.out.println("bye");
                     loop = false;
+                    continue;
+                }
+                // Check for malformed user input
+                if (promptResult.inputError()) {
+                    System.err.println("Malformed input, please try again.");
                     continue;
                 }
 
@@ -67,38 +73,39 @@ public class Client {
                 MasterResult masterResult = promptResult.masterResult();
                 // Master result is only null if cache was used
                 if (masterResult != null && !masterResult.noErrors()) {
-                    System.err.println("Master was called and it errored out");
                     if (!masterResult.masterStatus() && !masterResult.dbStatus()) {
-                        System.out.println("Master said it does not know of any such table!");
+                        System.err.println("ERROR : Master said it does not know of any such table!");
                     }
+                    else {
+                        System.err.println("ERROR : Master response had errors: master db status is "
+                                + masterResult.dbStatus() + " and master status is "
+                                + masterResult.masterStatus());
+                    }
+                    continue;
                 }
                 if (workerResult.noErrors()) {
                     // If set was the method and there's no errors but no returned value,
                     // then set was successful
                     if (promptResult.method() == SET
                             && workerResult.getReturnedValue() == null) {
-                        System.out.println("Successfully set!");
+                        System.out.println("SUCCESS : set!");
                         continue;
                     }
-                    System.out.println("response: " + workerResult.getReturnedValue());
+                    System.out.println("SUCCESS : Response: " + workerResult.getReturnedValue());
 
                 } else if (masterResult == null) {
-                    System.err.println("Used cache and worker was incorrect, aborting");
-                } else if (!masterResult.noErrors()) {
-                    System.err.println("Master response had errors: master db status is "
-                            + masterResult.dbStatus() + " and master status is "
-                            + masterResult.masterStatus());
+                    System.err.println("ERROR : Used cache and worker was incorrect, aborting");
                 } else if (!workerResult.workerStatus()
                         && !workerResult.dbStatus()
                         && promptResult.method() == GET) {
-                    System.err.println("Key does not exist");
+                    System.err.println("ERROR : Key does not exist");
                 } else {
-                    System.err.println("Worker response had errors: worker db status is "
+                    System.err.println("ERROR : Worker response had errors: worker db status is "
                             + workerResult.dbStatus() + " and worker status is "
                             + workerResult.workerStatus());
                 }
             } catch (Exception e) {
-                System.err.println("Client exception: " + e.toString());
+                System.err.println("ERROR : Client exception: " + e.toString());
                 e.printStackTrace();
             }
         }
@@ -113,34 +120,39 @@ public class Client {
      */
     private static PromptResult prompt(Master stub) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What would you like to do? " +
+        System.out.println(
+                "---------------------------" +
+                "\n What would you like to do? " +
                 "\n 1. `get <table> <key>` " +
                 "\n 2. `set <table> <key> <value>` " +
-                "\n 3. exit");
+                "\n 3. exit \n---------------------------"
+        );
         String input = scanner.nextLine().toLowerCase();
         // Check if input is get or set
         String[] tokens = input.split("\\s");
         PromptResult promptResult = null;
         if (tokens[0].equals("get")) {
             if (tokens.length != 3) {
-                System.err.println("get takes in only 2 arguments - table name and key");
+                System.err.println("ERROR : get takes in (only) 2 arguments - table name and key");
+                promptResult = new PromptResult(true, true);
             }
-            promptResult = handleGet(tokens[1], tokens[2], stub);
+            else promptResult = handleGet(tokens[1], tokens[2], stub);
         } else if (tokens[0].equals("set")) {
             if (tokens.length != 4) {
-                System.err.println("set takes in only 3 arguments - table name, key and value");
+                System.err.println("ERROR : set takes in (only) 3 arguments - table name, key and value");
+                promptResult = new PromptResult(true, true);
             }
-            promptResult = handleSet(tokens[1], tokens[2], tokens[3], stub);
+            else promptResult = handleSet(tokens[1], tokens[2], tokens[3], stub);
         } else if (tokens[0].equals("exit")) {
-            promptResult = new PromptResult(false);
-        }
+            promptResult = new PromptResult(false, false);
+        } else promptResult = new PromptResult(true, true);
         return promptResult;
     }
 
     /**
      * Invoked if user did a `get`.
      *
-     * @param table : table being operatedon
+     * @param table : table being operated on
      * @param key : the key the user wants to get
      * @param master_stub : the remote handle to Master
      * @return : Wrapper around MasterResult and WorkerResult
@@ -167,7 +179,8 @@ public class Client {
             } else return new PromptResult(null, masterResult, GET);
         } else {
             // Cache does contain key
-            System.out.println("Composite key " + compositeKey + " exists in cache...");
+            System.out.println("DEBUG : Composite key " + compositeKey +
+                    " exists in cache, fetching directly from Worker");
             ComputationResult computationResult = cache.get(compositeKey);
             String workerAddress = computationResult.getWorkerIpAddress();
             int workerId = computationResult.getId();
@@ -232,7 +245,8 @@ public class Client {
                 return new PromptResult(workerResult, masterResult, SET);
             } else return new PromptResult(null, masterResult, SET);
         } else { // cache does contain key
-            System.out.println("Composite key " + compositeKey + " exists in cache...");
+            System.out.println("DEBUG : Composite key " + compositeKey +
+                    " exists in cache, setting directly on Worker");
             ComputationResult computationResult = cache.get(compositeKey);
             String workerAddress = computationResult.getWorkerIpAddress();
             int workerId = computationResult.getId();
