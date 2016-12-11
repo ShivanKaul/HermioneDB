@@ -19,9 +19,9 @@ Done:
 - Minimum Viable Product
 - Table support
 - Client side caching
+- Consistent hashing to balance load across Workers
 - Server pushed client-side look ups similar to Google BigTable and EdgeBase
 
 In progress:
-- Efficient hashing
 - Transactions
 - Replication
