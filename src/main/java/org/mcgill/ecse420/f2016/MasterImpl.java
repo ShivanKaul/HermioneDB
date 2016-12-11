@@ -1,13 +1,5 @@
 package org.mcgill.ecse420.f2016;
 
-import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-
-import org.mcgill.ecse420.f2016.Configs.MasterConfig;
-
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseEntry;
@@ -16,90 +8,92 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.mcgill.ecse420.f2016.Configs.MasterConfig;
+import org.mcgill.ecse420.f2016.Result.MasterResult;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.Map;
+
 public class MasterImpl implements Master {
-    
-    //TODO Add a capability to dynamically assign worker addresses
-    // For now hardcoded to be Shivan's machine
-//    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "142.157.42.151";
-    private static final String WORKER_ADDRESS_FOR_CUSTOMER = "192.168.2.14";
-    // For now hardcoded to be my machine
-    private static final String WORKER_ADDRESS_FOR_EMPLOYEE = "localhost";
-    private static final String WORKER_ADDRESS_FOR_OTHERS = "others";
-    
+
+    public static final int RING_SIZE = 1000;
+
     private MasterDb masterDb;
-    private DatabaseEntry customerKey;
-    private DatabaseEntry employeeKey;
-    private DatabaseEntry otherKey;
-    private DatabaseEntry worker1;
-    private DatabaseEntry worker2;
-    private DatabaseEntry worker3;
 
     public MasterImpl() throws DatabaseException {
-        EnvironmentConfig envConfigWorker = new EnvironmentConfig();
-        envConfigWorker.setAllowCreate(true);
-        // DB config for workers
-        DatabaseConfig dbConfigWorker = new DatabaseConfig();
-        dbConfigWorker.setAllowCreate(true);
-        dbConfigWorker.setSortedDuplicates(false);
         EnvironmentConfig envConfigMaster = new EnvironmentConfig();
         envConfigMaster.setAllowCreate(true);
         // DB config for master
         DatabaseConfig dbConfigMaster = new DatabaseConfig();
         dbConfigMaster.setAllowCreate(true);
         dbConfigMaster.setSortedDuplicates(false);
+        File dir = new File("/tmp/master");
+        // Attempt to create the directory here
+        if (!dir.mkdir()) {
+            System.out.println("Failed trying to create directory /tmp/master, " +
+                    "please make sure you have access, " +
+                    "BerkeleyDDB cannot function without creating these directories");
+            System.exit(1);
+        }
         // Set master config
         MasterConfig masterConfig =
                 new MasterConfig(envConfigMaster, dbConfigMaster);
         masterDb = new MasterDb(masterConfig);
-        try {
-            customerKey = new DatabaseEntry("customer".getBytes("UTF-8"));
-            employeeKey = new DatabaseEntry("employee".getBytes("UTF-8"));
-            otherKey = new DatabaseEntry("other".getBytes("UTF-8"));
-            worker1 =
-                    new DatabaseEntry(WORKER_ADDRESS_FOR_CUSTOMER.getBytes("UTF-8"));
-            worker2 =
-                    new DatabaseEntry(WORKER_ADDRESS_FOR_EMPLOYEE.getBytes("UTF-8"));
-            worker3 = new DatabaseEntry(WORKER_ADDRESS_FOR_OTHERS.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        initMetadata();
     }
 
-    private void initMetadata() {
+    private void storeWorkerInMasterDb(int id, DatabaseEntry tableName, String address) {
         Database db = masterDb.getDB();
+        // Generate unique reference to worker
+        // Store in DB
         try {
-            if (db.get(null, customerKey, new DatabaseEntry(), LockMode.DEFAULT)
+            JSONObject value = new JSONObject().put("id", id).put("address", address);
+            System.out.println("Json object looks like " + value.toString());
+            DatabaseEntry got = new DatabaseEntry();
+            if (db.get(null, tableName, got, LockMode.DEFAULT)
                     .equals(OperationStatus.NOTFOUND)) {
-                // metadata for customer worker is not set yet. set it here
-                db.put(null, customerKey, worker1);
+                // metadata for table is not set yet. set it here
+                JSONArray ring = new JSONArray();
+                ring.put(value);
+                System.out.println("Table does not exist, adding...");
+                System.out.println("Ring looks like: " + ring.toString());
+                db.put(null, tableName, new DatabaseEntry(ring.toString().getBytes("UTF-8")));
+            } else {
+                JSONArray ring = new JSONArray(new String(got.getData(), "UTF-8"));
+                ring.put(value);
+                System.out.println("Table exists, appending...");
+                System.out.println("Ring looks like: " + ring.toString());
+                db.put(null, tableName, new DatabaseEntry(ring.toString().getBytes("UTF-8")));
             }
-            if (db.get(null, employeeKey, new DatabaseEntry(), LockMode.DEFAULT)
-                    .equals(OperationStatus.NOTFOUND)) {
-                // metadata for employee worker is not set yet. set it here
-                db.put(null, employeeKey, worker2);
-            }
-            if (db.get(null, otherKey, new DatabaseEntry(), LockMode.DEFAULT)
-                    .equals(OperationStatus.NOTFOUND)) {
-                // metadata for employee worker is not set yet. set it here
-                db.put(null, otherKey, worker3);
-            }
-            // TODO add 'other' type
-        } catch (DatabaseException e) {
+            db.sync();
+        } catch (DatabaseException | JSONException | UnsupportedEncodingException e) {
+            System.out.println("Error while trying to store worker in master db");
             e.printStackTrace();
         }
     }
 
     @Override
-    public String sayHello() throws RemoteException {
-        return "Hell low";
+    public void registerWorker(int id, String tableName, String ipAddress)
+            throws RemoteException, UnsupportedEncodingException {
+        // put in db
+        System.out.println("Received request to add worker "
+                + tableName
+                + " for ip address " + ipAddress);
+        DatabaseEntry table = new DatabaseEntry(tableName.getBytes("UTF-8"));
+        storeWorkerInMasterDb(id, table, ipAddress);
     }
 
     public static void main(String args[]) {
 
         try {
-//            int poolsize = (args.length < 1) ? 1 : Integer.parseInt(args[0]);
-
             MasterImpl obj = new MasterImpl();
             Master stub = (Master) UnicastRemoteObject.exportObject(obj, 0);
 
@@ -115,49 +109,45 @@ public class MasterImpl implements Master {
     }
 
     @Override
-    public Result getWorkerHost(String k)
+    public MasterResult getWorkerHost(String k)
             throws DatabaseException, RemoteException, WrongKeyFormatException {
         Database db = masterDb.getDB();
         DatabaseEntry result = new DatabaseEntry();
         System.out.println("Master received worker address request for key " + k);
-//        if (!k.matches("^[a-z]+_\\d+$")) {
-//            // Invalid format.
-//            throw new WrongKeyFormatException(
-//                    "Wrong key format. The key should start with the type followed by the index number");
-//        }
-        boolean opsb= false;
-        if (k.startsWith("customer")) {
-            // return customer related worker
-            OperationStatus ops =
-                    db.get(null, customerKey, result, LockMode.DEFAULT);
-            if (OperationStatus.SUCCESS == ops) opsb = true;
-            try {
-                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                return new Result(opsb, false, null);
+
+        boolean dbStatus = false;
+        boolean masterStatus = false;
+        // Get table
+        String[] composite_key = k.split("_");
+        String tableName = composite_key[0];
+        String key = composite_key[1];
+
+        try {
+            DatabaseEntry got = new DatabaseEntry();
+            if (db.get(null, new DatabaseEntry(tableName.getBytes("UTF-8")), got, LockMode.DEFAULT)
+                    .equals(OperationStatus.SUCCESS)) {
+                // send worker lookup computation
+                JSONArray jsonRing = new JSONArray(new String(got.getData(), "UTF-8"));
+                // Convert json array to hashmap :  ip address to id
+                Map<String, Integer> ring = new HashMap<>();
+                for (int i = 0; i < jsonRing.length(); i++) {
+                    ring.put(jsonRing.getJSONObject(i).getString("address"),
+                            jsonRing.getJSONObject(i).getInt("id"));
+                }
+                return new MasterResult(true, true, new WorkerLookupComputation(ring, key));
+            } else {
+                System.out.println("Master does not have a reference " +
+                        "to any worker that supports that table!");
             }
-        } else if (k.startsWith("employee")) {
-            // return employee related worker
-            OperationStatus ops =
-                    db.get(null, employeeKey, result, LockMode.DEFAULT);
-            if (OperationStatus.SUCCESS == ops) opsb = true;
-            try {
-                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                return new Result(opsb, false, null);
-            }
-        } else {
-            // return or a worker that takes any other type of data
-            OperationStatus ops = db.get(null, otherKey, result, LockMode.DEFAULT);
-            if (OperationStatus.SUCCESS == ops) opsb = true;
-            try {
-                return new Result(opsb, true, new String(result.getData(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                return new Result(opsb, false, null);
-            }
+            // The idea is that if the table does not exist in Master, then it is both a db fail
+            // as well as a master fail
+        } catch (DatabaseException e) {
+            e.printStackTrace();
+            masterStatus = true;
+        } catch (JSONException  | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            dbStatus = true;
         }
+        return new MasterResult(dbStatus, masterStatus, null);
     }
 }

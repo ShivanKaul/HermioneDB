@@ -7,7 +7,9 @@ import java.rmi.RemoteException;
 
 import com.sleepycat.je.DatabaseException;
 
+import org.mcgill.ecse420.f2016.Result.WorkerResult;
+
 public interface Worker extends Remote {
-    Result get(String key) throws DatabaseException, RemoteException, UnsupportedEncodingException;
-    Result set(String key, String value) throws DatabaseException, RemoteException, UnsupportedEncodingException;
+    WorkerResult get(String key) throws DatabaseException, RemoteException, UnsupportedEncodingException;
+    WorkerResult set(String key, String value) throws DatabaseException, RemoteException, UnsupportedEncodingException;
 }
