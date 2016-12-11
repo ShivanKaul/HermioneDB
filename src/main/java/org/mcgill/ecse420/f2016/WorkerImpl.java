@@ -1,6 +1,13 @@
 package org.mcgill.ecse420.f2016;
 
-import com.sleepycat.je.*;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.OperationStatus;
+
 import org.mcgill.ecse420.f2016.Configs.WorkerConfig;
 import org.mcgill.ecse420.f2016.Result.WorkerResult;
 
@@ -41,7 +48,7 @@ public class WorkerImpl implements Worker {
 
         int id = Math.abs(UUID.randomUUID().toString().hashCode()) % RING_SIZE;
 
-        String uniqueWorkerName = String.format("Worker_%s_%d", name, id);
+        String uniqueWorkerName = String.format("worker_%s_%d", name, id);
 
         File dir = new File(String.format("/tmp/%s", uniqueWorkerName));
         // attempt to create the directory here
@@ -101,7 +108,8 @@ public class WorkerImpl implements Worker {
     public WorkerResult get(String key) throws DatabaseException, UnsupportedEncodingException {
         System.out.println("Worker " + name + " received get request for key " + key);
         DatabaseEntry gotValue = new DatabaseEntry();
-        OperationStatus opStatus = workerDb.get(null, new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
+        OperationStatus opStatus = workerDb.get(null,
+                new DatabaseEntry(key.getBytes("UTF-8")), gotValue, LockMode.DEFAULT); // Might throw database exception
         boolean opStatusb = false;
         if (gotValue.getData() == null) {
             err.println("Key " + key + " doesn't exist in worker " + name);
