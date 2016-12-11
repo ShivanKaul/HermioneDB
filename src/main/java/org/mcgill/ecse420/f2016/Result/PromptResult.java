@@ -1,6 +1,11 @@
 package org.mcgill.ecse420.f2016.Result;
 
-// NOTE that only Client uses this 
+
+/**
+ * Used internally by Client as a wrapper on the communication results between Client and Master
+ * and Client and a Worker for a single operation.
+ * Does not need to be Serializable
+ */
 public class PromptResult {
     private WorkerResult workerResult = null;
     private MasterResult masterResult = null;

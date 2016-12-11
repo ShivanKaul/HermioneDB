@@ -23,6 +23,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Master : Stores metadata about the tables and workers.
+ */
 public class MasterImpl implements Master {
 
     public static final int RING_SIZE = 1000;
@@ -50,6 +53,13 @@ public class MasterImpl implements Master {
         masterDb = new MasterDb(masterConfig);
     }
 
+    /**
+     * Store a Worker's IP address and UUID in Master's db instance.
+     *
+     * @param id : worker UUID
+     * @param tableName : worker's table
+     * @param address : worker's IP address
+     */
     private void storeWorkerInMasterDb(int id, DatabaseEntry tableName, String address) {
         Database db = masterDb.getDB();
         // Generate unique reference to worker
@@ -80,6 +90,15 @@ public class MasterImpl implements Master {
         }
     }
 
+    /**
+     * Called by Worker when it starts up.
+     *
+     * @param id : worker UUID
+     * @param tableName : worker table
+     * @param ipAddress : worker IP address
+     * @throws RemoteException
+     * @throws UnsupportedEncodingException
+     */
     @Override
     public void registerWorker(int id, String tableName, String ipAddress)
             throws RemoteException, UnsupportedEncodingException {
@@ -92,7 +111,6 @@ public class MasterImpl implements Master {
     }
 
     public static void main(String args[]) {
-
         try {
             MasterImpl obj = new MasterImpl();
             Master stub = (Master) UnicastRemoteObject.exportObject(obj, 0);
@@ -108,6 +126,15 @@ public class MasterImpl implements Master {
         }
     }
 
+    /**
+     * Called by Client to figure out which worker to talk to, given a key.
+     *
+     * @param k : key
+     * @return
+     * @throws DatabaseException
+     * @throws RemoteException
+     * @throws WrongKeyFormatException
+     */
     @Override
     public MasterResult getWorkerHost(String k)
             throws DatabaseException, RemoteException, WrongKeyFormatException {

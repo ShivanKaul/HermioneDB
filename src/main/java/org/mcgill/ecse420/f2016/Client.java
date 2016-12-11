@@ -16,9 +16,17 @@ import java.util.Scanner;
 import static org.mcgill.ecse420.f2016.Result.PromptResult.Method.GET;
 import static org.mcgill.ecse420.f2016.Result.PromptResult.Method.SET;
 
+/**
+ * Client : sample UI to demonstrate how BerkeleyDDB might be used.
+ * Implements a CLI to allow `get` and `set`
+ * Handles user input
+ * Talks to Master to get a WorkerLookupComputation and then uses that to figure out which Worker
+ * to talk to, and then communicates with it
+ * Uses caching to store ComputationResults
+ */
 public class Client {
 
-    static Registry registry;
+    private static Registry registry;
     // The cache is of composite key to Computation Result
     // Composite key : table_key
     // ComputationResult : describes the 'hashing' object returned by the Master
@@ -44,7 +52,7 @@ public class Client {
         } catch (Exception e) {
             System.out.println("Error finding Master in registry from client: " + e.toString());
         }
-        // prompt loop
+        // Prompt loop
         boolean loop = true;
         while (loop) {
             try {
@@ -54,6 +62,7 @@ public class Client {
                     continue;
                 }
 
+                // Error handling
                 WorkerResult workerResult = promptResult.workerResult();
                 MasterResult masterResult = promptResult.masterResult();
                 // Master result is only null if cache was used
@@ -64,13 +73,17 @@ public class Client {
                     }
                 }
                 if (workerResult.noErrors()) {
-                    // If set was the method and there's no errors but no returned value
+                    // If set was the method and there's no errors but no returned value,
+                    // then set was successful
                     if (promptResult.method() == SET
                             && workerResult.getReturnedValue() == null) {
                         System.out.println("Successfully set!");
                         continue;
                     }
                     System.out.println("response: " + workerResult.getReturnedValue());
+
+                } else if (masterResult == null) {
+                    System.err.println("Used cache and worker was incorrect, aborting");
                 } else if (!masterResult.noErrors()) {
                     System.err.println("Master response had errors: master db status is "
                             + masterResult.dbStatus() + " and master status is "
@@ -91,7 +104,13 @@ public class Client {
         }
     }
 
-    @SuppressWarnings("resource")
+    /**
+     * Handle user input.
+     *
+     * @param stub : remote handle to Master
+     * @return
+     * @throws Exception
+     */
     private static PromptResult prompt(Master stub) throws Exception {
         Scanner scanner = new Scanner(System.in);
         System.out.println("What would you like to do? " +
@@ -118,11 +137,21 @@ public class Client {
         return promptResult;
     }
 
+    /**
+     * Invoked if user did a `get`.
+     *
+     * @param table : table being operatedon
+     * @param key : the key the user wants to get
+     * @param master_stub : the remote handle to Master
+     * @return : Wrapper around MasterResult and WorkerResult
+     * @throws Exception
+     */
     private static PromptResult handleGet(String table, String key, Master master_stub) throws Exception {
-        // Get a handle to the worker from the master
+        // Get a handle to the worker from the master and then
         // Talk to the worker directly
         String compositeKey = table + "_" + key;
         if (!cache.containsKey(compositeKey)) {
+            // Cache doesn't contain key
             MasterResult masterResult = master_stub.getWorkerHost(compositeKey);
             if (masterResult.noErrors()) {
                 ComputationResult computationResult = masterResult.getComputation().lookUpWorker();
@@ -136,7 +165,8 @@ public class Client {
                 }
                 return new PromptResult(workerResult, masterResult, GET);
             } else return new PromptResult(null, masterResult, GET);
-        } else { // cache does contain key
+        } else {
+            // Cache does contain key
             System.out.println("Composite key " + compositeKey + " exists in cache...");
             ComputationResult computationResult = cache.get(compositeKey);
             String workerAddress = computationResult.getWorkerIpAddress();
@@ -145,7 +175,7 @@ public class Client {
             try {
                 worker = getWorkerFromAddress(workerAddress, table, workerId);
             } catch (Exception e) {
-                // failed, just get key from master
+                // Failed, just get key from master
                 MasterResult masterResult = master_stub.getWorkerHost(compositeKey);
                 if (masterResult.noErrors()) {
                     computationResult = masterResult.getComputation().lookUpWorker();
@@ -165,12 +195,24 @@ public class Client {
         }
     }
 
+    // Helper method to lookup registry for Worker
     private static Worker getWorkerFromAddress(String workerAddress, String tableName, int id)
             throws RemoteException, NotBoundException {
         registry = LocateRegistry.getRegistry(workerAddress);
-        return (Worker) registry.lookup(String.format("Worker_%s_%d", tableName, id));
+        return (Worker) registry.lookup(String.format("worker_%s_%d", tableName, id));
     }
 
+    /**
+     * Invoked if user did a `set`.
+     *
+     * @param table : table being operatedon
+     * @param key : the key the user wants to get
+     * @param master_stub : the remote handle to Master
+     * @return : Wrapper around MasterResult and WorkerResult
+     * @param value : the value to set
+     * @return
+     * @throws Exception
+     */
     private static PromptResult handleSet(String table, String key, String value, Master master_stub) throws Exception {
         // Get a handle to the worker from the master
         // Talk to the worker directly

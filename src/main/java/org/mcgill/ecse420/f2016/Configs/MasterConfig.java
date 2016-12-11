@@ -8,7 +8,8 @@ import java.io.File;
 
 public class MasterConfig extends Config {
 
-    public MasterConfig(EnvironmentConfig envConfig, DatabaseConfig dbConfig) throws DatabaseException {
+    public MasterConfig(EnvironmentConfig envConfig,
+                        DatabaseConfig dbConfig) throws DatabaseException {
         super("/tmp/master", envConfig, dbConfig);
     }
 }

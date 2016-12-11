@@ -7,6 +7,10 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import java.io.File;
 
+/**
+ * Base config, Master config and Worker config derive from this.
+ * Used to set BerkeleyDB db and environment params
+ */
 public class Config {
     public final Environment environment;
     public final DatabaseConfig dbConfig;

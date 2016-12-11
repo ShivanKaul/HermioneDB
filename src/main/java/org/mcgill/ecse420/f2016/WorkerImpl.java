@@ -26,11 +26,13 @@ import java.util.UUID;
 import static java.lang.System.err;
 import static org.mcgill.ecse420.f2016.MasterImpl.RING_SIZE;
 
+/**
+ * Worker : Used for implementing a single Worker which has a table
+ */
 public class WorkerImpl implements Worker {
 
     private Database workerDb;
     private static String name;
-    private static String masterIpAddress;
 
     // Constructor
     public WorkerImpl(WorkerConfig config,
@@ -40,9 +42,10 @@ public class WorkerImpl implements Worker {
 
     public static void main(String args[]) {
         name = (args.length < 1) ? null : args[0].toLowerCase();
-        masterIpAddress = (args.length < 2) ? "localhost" : args[1];
+        String masterIpAddress = (args.length < 2) ? "localhost" : args[1];
         if (name == null) {
-            System.out.println("Worker needs two arguments - table and master's IP address");
+            System.out.println("Worker needs two arguments - " +
+                    "table and master's IP address (default is localhost)");
             System.exit(1);
         }
 
@@ -51,7 +54,7 @@ public class WorkerImpl implements Worker {
         String uniqueWorkerName = String.format("worker_%s_%d", name, id);
 
         File dir = new File(String.format("/tmp/%s", uniqueWorkerName));
-        // attempt to create the directory here
+        // Attempt to create the directory here
         if (!dir.exists() && !dir.mkdir()) {
             System.out.println(String.format("Failed trying to create directory /tmp/%s, " +
                     "please make sure you have access, " +
@@ -104,7 +107,14 @@ public class WorkerImpl implements Worker {
         }
     }
 
-    // Remote Method: Will be called by client driver after getting reference to this worker
+    /**
+     * Remote Method: Will be called by client driver after getting reference to this worker.
+     *
+     * @param key : get this key
+     * @return
+     * @throws DatabaseException
+     * @throws UnsupportedEncodingException
+     */
     public WorkerResult get(String key) throws DatabaseException, UnsupportedEncodingException {
         System.out.println("Worker " + name + " received get request for key " + key);
         DatabaseEntry gotValue = new DatabaseEntry();
@@ -123,7 +133,16 @@ public class WorkerImpl implements Worker {
             return new WorkerResult(opStatusb, true, null);
         }
     }
-    // Remote Method: Will be called by client driver after getting reference to this worker
+
+    /**
+     * Remote Method: Will be called by client driver after getting reference to this worker.
+     *
+     * @param key : set this key's value
+     * @param value : set this value
+     * @return
+     * @throws DatabaseException
+     * @throws UnsupportedEncodingException
+     */
     public WorkerResult set(String key, String value) throws DatabaseException, UnsupportedEncodingException {
         System.out.println("Worker " + name + " received set request for key " + key
                 + " with value " + value);

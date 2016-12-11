@@ -2,6 +2,10 @@ package org.mcgill.ecse420.f2016.Result;
 
 import java.io.Serializable;
 
+/**
+ * Wrapper over the return values of WorkerLookupComputation. If Java had tuples we would not need
+ * this...
+ */
 public class ComputationResult implements Serializable {
     private int id;
     private String workerIpAddress;

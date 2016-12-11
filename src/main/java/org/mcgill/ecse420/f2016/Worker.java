@@ -9,6 +9,10 @@ import java.io.UnsupportedEncodingException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * Worker Remote Interface : used by Client to call `get` and `set` once it has a reference to the
+ * worker.
+ */
 public interface Worker extends Remote {
     WorkerResult get(String key) throws DatabaseException, RemoteException, UnsupportedEncodingException;
     WorkerResult set(String key, String value) throws DatabaseException, RemoteException, UnsupportedEncodingException;

@@ -4,6 +4,12 @@ import org.mcgill.ecse420.f2016.WorkerLookupComputation;
 
 import java.io.Serializable;
 
+/**
+ * Used in communication between Master and Client.
+ * Serializable because it has to be sent over the network.
+ * Holds a tuple of statuses and the initialized lookup computation that the client will then use
+ * to figure out which Worker to talk to
+ */
 public class MasterResult extends Result implements Serializable {
 
     private static final long serialVersionUID = 1L;
