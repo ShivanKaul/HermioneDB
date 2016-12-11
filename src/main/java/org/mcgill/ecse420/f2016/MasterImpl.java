@@ -38,7 +38,7 @@ public class MasterImpl implements Master {
         dbConfigMaster.setSortedDuplicates(false);
         File dir = new File("/tmp/master");
         // Attempt to create the directory here
-        if (!dir.mkdir()) {
+        if (!dir.exists() && !dir.mkdir()) {
             System.out.println("Failed trying to create directory /tmp/master, " +
                     "please make sure you have access, " +
                     "BerkeleyDDB cannot function without creating these directories");

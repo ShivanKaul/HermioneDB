@@ -4,9 +4,6 @@ import java.io.Serializable;
 
 public class WorkerResult extends Result implements Serializable {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     
     private boolean workerStatus = true;

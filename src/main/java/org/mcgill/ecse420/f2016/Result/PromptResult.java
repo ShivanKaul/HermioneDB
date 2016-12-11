@@ -11,7 +11,8 @@ public class PromptResult {
         GET, SET
     }
 
-    public PromptResult(WorkerResult workerResult, MasterResult masterResult, Method method) {
+    public PromptResult(WorkerResult workerResult, MasterResult masterResult,
+                        Method method) {
         this.workerResult = workerResult;
         this.masterResult = masterResult;
         this.method = method;

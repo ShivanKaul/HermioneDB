@@ -45,7 +45,7 @@ public class WorkerImpl implements Worker {
 
         File dir = new File(String.format("/tmp/%s", uniqueWorkerName));
         // attempt to create the directory here
-        if (!dir.mkdir()) {
+        if (!dir.exists() && !dir.mkdir()) {
             System.out.println(String.format("Failed trying to create directory /tmp/%s, " +
                     "please make sure you have access, " +
                     "BerkeleyDDB cannot function without creating these directories"));

@@ -2,8 +2,8 @@ package org.mcgill.ecse420.f2016;
 
 import org.mcgill.ecse420.f2016.Result.ComputationResult;
 import org.mcgill.ecse420.f2016.Result.MasterResult;
-import org.mcgill.ecse420.f2016.Result.WorkerResult;
 import org.mcgill.ecse420.f2016.Result.PromptResult;
+import org.mcgill.ecse420.f2016.Result.WorkerResult;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -13,11 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import static org.mcgill.ecse420.f2016.Result.PromptResult.Method.GET;
+import static org.mcgill.ecse420.f2016.Result.PromptResult.Method.SET;
+
 public class Client {
 
     static Registry registry;
-    // We eventually need to cache the hash object that gives us the worker
-    // For now we just have simple map from key (dbname + key) to worker IP
+    // The cache is of composite key to Computation Result
+    // Composite key : table_key
+    // ComputationResult : describes the 'hashing' object returned by the Master
     static Map<String, ComputationResult> cache = new HashMap<>();
 
     public static void main(String[] args) {
@@ -60,8 +64,8 @@ public class Client {
                     }
                 }
                 if (workerResult.noErrors()) {
-                    // If set was the method and there's no errors but the no returned value
-                    if (promptResult.method() == PromptResult.Method.SET
+                    // If set was the method and there's no errors but no returned value
+                    if (promptResult.method() == SET
                             && workerResult.getReturnedValue() == null) {
                         System.out.println("Successfully set!");
                         continue;
@@ -73,7 +77,7 @@ public class Client {
                             + masterResult.masterStatus());
                 } else if (!workerResult.workerStatus()
                         && !workerResult.dbStatus()
-                        && promptResult.method() == PromptResult.Method.GET) {
+                        && promptResult.method() == GET) {
                     System.err.println("Key does not exist");
                 } else {
                     System.err.println("Worker response had errors: worker db status is "
@@ -90,7 +94,10 @@ public class Client {
     @SuppressWarnings("resource")
     private static PromptResult prompt(Master stub) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What would you like to do? \n 1. `get <table> <key>` \n 2. `set <table> <key> <value>` \n 3. exit");
+        System.out.println("What would you like to do? " +
+                "\n 1. `get <table> <key>` " +
+                "\n 2. `set <table> <key> <value>` " +
+                "\n 3. exit");
         String input = scanner.nextLine().toLowerCase();
         // Check if input is get or set
         String[] tokens = input.split("\\s");
@@ -127,8 +134,8 @@ public class Client {
                     // Put in cache
                     cache.put(compositeKey, computationResult);
                 }
-                return new PromptResult(workerResult, masterResult, PromptResult.Method.GET);
-            } else return new PromptResult(null, masterResult, PromptResult.Method.GET);
+                return new PromptResult(workerResult, masterResult, GET);
+            } else return new PromptResult(null, masterResult, GET);
         } else { // cache does contain key
             System.out.println("Composite key " + compositeKey + " exists in cache...");
             ComputationResult computationResult = cache.get(compositeKey);
@@ -150,11 +157,11 @@ public class Client {
                         // Put in cache
                         cache.put(compositeKey, computationResult);
                     }
-                    return new PromptResult(workerResult, masterResult, PromptResult.Method.GET);
-                } else return new PromptResult(null, masterResult, PromptResult.Method.GET);
+                    return new PromptResult(workerResult, masterResult, GET);
+                } else return new PromptResult(null, masterResult, GET);
             }
             WorkerResult workerResult = worker.get(key);
-            return new PromptResult(workerResult, null, PromptResult.Method.GET);
+            return new PromptResult(workerResult, null, GET);
         }
     }
 
@@ -180,8 +187,8 @@ public class Client {
                     // Put in cache
                     cache.put(compositeKey, computationResult);
                 }
-                return new PromptResult(workerResult, masterResult, PromptResult.Method.SET);
-            } else return new PromptResult(null, masterResult, PromptResult.Method.SET);
+                return new PromptResult(workerResult, masterResult, SET);
+            } else return new PromptResult(null, masterResult, SET);
         } else { // cache does contain key
             System.out.println("Composite key " + compositeKey + " exists in cache...");
             ComputationResult computationResult = cache.get(compositeKey);
@@ -203,11 +210,11 @@ public class Client {
                         // Put in cache
                         cache.put(compositeKey, computationResult);
                     }
-                    return new PromptResult(workerResult, masterResult, PromptResult.Method.SET);
-                } else return new PromptResult(null, masterResult, PromptResult.Method.SET);
+                    return new PromptResult(workerResult, masterResult, SET);
+                } else return new PromptResult(null, masterResult, SET);
             }
             WorkerResult workerResult = worker.set(key, value);
-            return new PromptResult(workerResult, null, PromptResult.Method.SET);
+            return new PromptResult(workerResult, null, SET);
         }
     }
 }

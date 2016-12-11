@@ -8,6 +8,7 @@ ctrl_c() {
         kill `ps | grep [r]miregistry | awk '{print $1}'`
         #kill `ps -a | grep rmi | cut -d ' ' -f 1`
     }
+#sh clean.sh
 jar xf je-3.3.75.jar
 rmiregistry &
 echo -e "Process running rmi registry: ";
