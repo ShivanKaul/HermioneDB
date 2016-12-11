@@ -25,6 +25,7 @@ public class WorkerLookupComputation implements Serializable {
         int minDelta = Integer.MAX_VALUE;
         int smallestKey = Integer.MAX_VALUE;
         int hashedKey = Math.abs(key.hashCode()) % RING_SIZE;
+        System.out.println(String.format("DEBUG : Key %s hashes to %d", key, hashedKey));
         String smallestIpAddress = null;
         String workerIpAddress = null;
         // Traverse the ring and pick which bucket the hashed key should fall into
