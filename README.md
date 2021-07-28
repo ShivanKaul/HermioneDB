@@ -1,7 +1,14 @@
 BerkeleyDDB
 ---------
 
-Using [BerkeleyDB](https://en.wikipedia.org/wiki/Berkeley_DB) to make a distributed database. Project report is *[ECSE420_Project.pdf](https://github.com/ShivanKaul/BerkeleyDDB/blob/master/ECSE420_Project.pdf)*.
+Using [BerkeleyDB](https://en.wikipedia.org/wiki/Berkeley_DB) to make a distributed database. 
+
+### Features:
+- Consistent hashing to balance load across Workers
+- Server pushed client-side look ups similar to Google BigTable and EdgeBase
+- Table support
+- Client side caching
+
 
 ### Running Instructions
 
@@ -17,12 +24,7 @@ To compile and run the software:
   6. Have fun!
   7. To turn off the system, please use *Ctrl + c* on each host running one of the *runXX.sh* scripts. For killing rmi registries, please run *killrmis.sh* script. 
 
-#### Done:
-- MVP
-- Table support
-- Client side caching
-- Consistent hashing to balance load across Workers
-- Server pushed client-side look ups similar to Google BigTable and EdgeBase
+
 
 #### In progress:
 - Transactions
